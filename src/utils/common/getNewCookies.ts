@@ -3,7 +3,7 @@ import puppeteerExtra from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import goToNewPage from "./goToNewPage.js";
 
-export default async function getNewCookeis(page: Page) {
+export default async function getNewCookeis(page: Page, sourceUrl: string) {
   // Clear all cookies
   const oldCookies = await page.cookies();
   await page.deleteCookie(...oldCookies);
@@ -15,7 +15,7 @@ export default async function getNewCookeis(page: Page) {
   const browser = await puppeteerExtraAny.launch({ headless: false });
   const newPage = await browser.newPage();
 
-  await goToNewPage(newPage, "https://clutch.co/us/web-developers?reviews=1", {
+  await goToNewPage(newPage, sourceUrl, {
     waitUntil: "networkidle2",
   });
   // // Wait until all the cookies are added to the page

@@ -1,28 +1,26 @@
 import { Page } from "puppeteer";
 import ClutchCompanyType from "../../../types/ClutchCompany.js";
 import goToNewPage from "../common/goToNewPage.js";
-import checkAndHold from "../common/checkAndHold.js";
 import checkForCaptcha from "./checkForCaptcha.js";
 
-export default async function getCompanyDetails(
-  companyElements: Array<Partial<ClutchCompanyType>>,
+export default async function scrapeCompanyPage(
+  companies: Partial<ClutchCompanyType>[],
   page: Page
 ) {
-  for (const company of companyElements) {
+  for (const company of companies) {
     try {
       await goToNewPage(page, `${company?.links?.profile}`, {
         waitUntil: "networkidle2",
       });
-
-      await checkAndHold(page, process.env.CLUTCH_URL!, checkForCaptcha);
+      await checkForCaptcha(page);
 
       const companyInfo = await page.evaluate(() => {
         const linksElements = document
-          ?.querySelector(".profile-social")
+          ?.querySelector(".social-profile")
           ?.querySelectorAll("a");
 
         const serviceElements = document?.querySelectorAll(
-          ".chart-legend .chart-legend--list li"
+          "ul.focus-area-legend:first-of-type li"
         );
 
         const linksElementsArr = linksElements ? Array.from(linksElements) : [];
@@ -31,7 +29,9 @@ export default async function getCompanyDetails(
           : [];
 
         const linksArray = linksElementsArr?.map((element) => ({
-          title: element.title.toLowerCase(),
+          title: element
+            .getAttribute("data-content")
+            ?.match(/<i>(.*?)<\/i>/)?.[1],
           href: element.href,
         }));
 
@@ -41,14 +41,12 @@ export default async function getCompanyDetails(
 
         return { linksArray, servicesArray };
       });
-
       companyInfo?.linksArray.forEach(({ title, href }) => {
-        company.links![title] = href;
+        if (title) company.links![title] = href;
       });
-
       company.services = companyInfo?.servicesArray as string[];
     } catch (error: any) {
-      console.error("Error getting company links", error?.message);
+      console.error("Error scrapeCompanyPage: ", error?.message);
     }
   }
 }

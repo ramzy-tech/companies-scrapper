@@ -1,3 +1,7 @@
+import dotenv from "dotenv";
+// Load environment variables from .env file
+dotenv.config();
+
 import puppeteer from "puppeteer";
 import fs from "fs/promises";
 import startClutchScraping from "./scrape/clutch-scrape.js";
@@ -12,8 +16,8 @@ import startGoodFirmsScraping from "./scrape/goodfirms-scrape.js";
 
   const url =
     websiteName === "clutch"
-      ? "https://clutch.co/us/web-developers?reviews=1"
-      : "https://www.goodfirms.co/directory/cms/top-website-development-companies";
+      ? process.env.CLUTCH_URL!
+      : process.env.GOODFIRMS_URL!;
 
   const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();

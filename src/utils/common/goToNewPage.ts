@@ -1,11 +1,11 @@
-import { Page } from "puppeteer";
-import delay from "../common/delay.js";
-import getRandomNumber from "../common/getRandomNumber.js";
+import { GoToOptions, Page } from "puppeteer";
+import delay from "./delay.js";
+import getRandomNumber from "./getRandomNumber.js";
 
 export default async function goToNewPage(
   page: Page,
   url: string,
-  options: any
+  options: GoToOptions
 ) {
   try {
     await page.goto(url, { ...options });
