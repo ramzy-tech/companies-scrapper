@@ -8,21 +8,22 @@ import scrapePage from "../utils/clutch/scrapePage.js";
 import checkForCaptcha from "../utils/clutch/checkForCaptcha.js";
 
 export default async function startClutchScraping(page: Page, url: string) {
-  let errorsNumber = 0;
+  let errorsNumber = 0,
+    nextPage = url;
   await getNewCookeis(page, process.env.CLUTCH_URL!);
   do {
     try {
-      console.log(`Working on page ${url}`);
+      console.log(`Working on page ${nextPage}`);
       if (errorsNumber > 6) break;
-      await goToNewPage(page, url, { waitUntil: "networkidle2" });
+      await goToNewPage(page, nextPage, { waitUntil: "networkidle2" });
       await checkAndHold(page, process.env.CLUTCH_URL!, checkForCaptcha);
 
+      nextPage = await getNextPageLink(page);
       await scrapePage(page);
-      url = await getNextPageLink(page);
     } catch (error) {
       delay(2 * errorsNumber);
-      console.log(error);
+      console.log("StartClutchScraping: ", error);
       errorsNumber++;
     }
-  } while (url);
+  } while (nextPage);
 }

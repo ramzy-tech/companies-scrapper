@@ -1,8 +1,9 @@
 import { Page } from "puppeteer";
-import path from "path";
 import fs from "fs/promises";
 import ClutchCompanyType from "../../../types/ClutchCompany.js";
 import getCompanyDetails from "./getCompanyDetails.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
 export default async function scrapePage(page: Page) {
   const companiesData = await page.evaluate(() => {
@@ -81,16 +82,22 @@ export default async function scrapePage(page: Page) {
     return results;
   });
 
+  const pageNumber = page.url().match(/(?:\?|&)page=(\d+)/)?.[1] ?? "0";
+  companiesData.forEach((company) => (company.page = pageNumber));
+
   try {
+    const currentModuleDirectory = path.dirname(fileURLToPath(import.meta.url));
+
+    const filePath = path.join(
+      currentModuleDirectory,
+      "../../../clutch-data.json"
+    );
+
     await getCompanyDetails(companiesData, page);
     const newDataString = JSON.stringify(companiesData, null, 2)
       .replace(/^\[|\]$/g, "")
       .concat(",");
-    await fs.appendFile(
-      path.join(__dirname, "..", "data.json"),
-      newDataString,
-      "utf8"
-    );
+    await fs.appendFile(filePath, newDataString, "utf8");
     console.log("Data appended to file successfully!");
   } catch (error: any) {
     console.error("Error appending data to file:", error?.message);

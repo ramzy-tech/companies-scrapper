@@ -13,11 +13,11 @@ export default async function goToNewPage(
     const isConnected = await checkOnlineStatus();
 
     if (isConnected) {
-      console.log(error?.message);
+      console.log("GoToNewPage: ", error?.message);
     } else {
       while (true) {
         console.log("No internet access...");
-        await delay(getRandomNumber(180, 360));
+        await delay(getRandomNumber(30, 60));
         const isConnected = await checkOnlineStatus();
         if (isConnected) {
           console.log("The connection is back now...");

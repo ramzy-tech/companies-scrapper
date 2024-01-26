@@ -14,15 +14,25 @@ import startGoodFirmsScraping from "./scrape/goodfirms-scrape.js";
     return;
   }
 
-  const url =
-    websiteName === "clutch"
-      ? process.env.CLUTCH_URL!
+  const pageNumber = process.argv[3]?.match(/--page=(\d+)/)?.[1];
+  let url: string;
+  if (websiteName === "clutch") {
+    url = pageNumber
+      ? `https://clutch.co/us/web-developers?page=${pageNumber}&reviews=1`
+      : process.env.CLUTCH_URL!;
+  } else {
+    url = pageNumber
+      ? `https://www.goodfirms.co/directory/cms/top-website-development-companies?page=${pageNumber}`
       : process.env.GOODFIRMS_URL!;
+  }
 
   const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
 
-  await fs.writeFile("./data.json", "[");
+  const fileName =
+    websiteName === "clutch" ? "./clutch-data.json" : "./goodfirms-data.json";
+  await fs.writeFile(fileName, "[");
+
   const startTime = performance.now();
   let endTime: number;
   try {
@@ -30,10 +40,11 @@ import startGoodFirmsScraping from "./scrape/goodfirms-scrape.js";
       ? await startClutchScraping(page, url)
       : await startGoodFirmsScraping(page, url);
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error Index:", error);
   }
   browser.close();
-  await fs.appendFile("./data.json", "]");
+
+  await fs.appendFile(fileName, "]");
   endTime = performance.now();
   console.log(
     `web scraping took ${Math.round(

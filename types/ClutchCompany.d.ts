@@ -1,4 +1,5 @@
 type ClutchCompanyType = {
+  page: string;
   name: string;
   rating: string;
   tagline: string;
