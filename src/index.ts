@@ -11,7 +11,7 @@ import getStartingUrl from "./utils/common/root/getStartingUrl.js";
 (async function () {
   try {
     const { url, websiteName, sholudRewrite } = getStartingUrl();
-    const browser = await puppeteer.launch({ headless: false, slowMo: 50 });
+    const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
 
     const fileName =
