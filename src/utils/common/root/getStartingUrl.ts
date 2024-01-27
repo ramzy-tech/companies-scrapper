@@ -13,7 +13,9 @@ export default function getStartingUrl() {
   const currentModuleDirectory = path.dirname(fileURLToPath(import.meta.url));
   const fileAbsolutePath = path.join(
     currentModuleDirectory,
-    "../../../../clutch-data.json"
+    `../../../../${
+      websiteName === "clutch" ? "clutch-data.json" : "goodfirms-data.json"
+    }`
   );
   const pageNumber = process.argv[3]?.match(/--page=(\d+)/)?.[1];
   let url = "",
@@ -23,20 +25,37 @@ export default function getStartingUrl() {
     if (pageNumber)
       url = `https://clutch.co/us/web-developers?page=${pageNumber}&reviews=1`;
     else if (!fs.existsSync(fileAbsolutePath)) url = process.env.CLUTCH_URL!;
-    else if (isJSONFileValid("../../../../clutch-data.json"))
+    else if (isJSONFileValid(fileAbsolutePath))
       throw new Error(
         "The data file is complete please save it then delete it to start the scraping..."
       );
     else {
-      const lastPageNumber = getLastPageNumber("../../../../clutch-data.json");
-      url = `https://clutch.co/us/web-developers?page=${lastPageNumber}&reviews=1`;
-      sholudRewrite = false;
+      const lastPageNumber = getLastPageNumber(fileAbsolutePath);
+      if (lastPageNumber) {
+        url = `https://clutch.co/us/web-developers?page=${lastPageNumber}&reviews=1`;
+        sholudRewrite = false;
+      } else {
+        url = process.env.CLUTCH_URL!;
+      }
     }
   } // Goodfirms Company
   else {
-    url = pageNumber
-      ? `https://www.goodfirms.co/directory/cms/top-website-development-companies?page=${pageNumber}`
-      : process.env.GOODFIRMS_URL!;
+    if (pageNumber)
+      url = `https://www.goodfirms.co/directory/cms/top-website-development-companies?page=${pageNumber}`;
+    else if (!fs.existsSync(fileAbsolutePath)) url = process.env.GOODFIRMS_URL!;
+    else if (isJSONFileValid(fileAbsolutePath))
+      throw new Error(
+        "The data file is complete please save it then delete it to start the scraping..."
+      );
+    else {
+      const lastPageNumber = getLastPageNumber(fileAbsolutePath);
+      if (lastPageNumber) {
+        url = `https://www.goodfirms.co/directory/cms/top-website-development-companies?page=${lastPageNumber}`;
+        sholudRewrite = false;
+      } else {
+        url = process.env.GOODFIRMS_URL!;
+      }
+    }
   }
 
   return { url, websiteName, sholudRewrite };

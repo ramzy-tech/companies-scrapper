@@ -20,6 +20,7 @@
     "mysql2": "^3.5.2",
     "puppeteer": "^21.3.6",
     "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-recaptcha": "^3.6.8",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
     "request": "^2.88.2"
   }

@@ -1,6 +1,8 @@
 dist/
 node_modules/
 data.json
+clutch-data.json
+goodfirms-data.json
 
 # Environment files
 .env
