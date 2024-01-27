@@ -8,8 +8,7 @@ export default async function checkForCaptcha(page: Page) {
 
   while (capthaElement) {
     const rondomNumber = getRandomNumber(5, 15);
-    console.log(`Waiting for ${rondomNumber} Seconds...`);
-    console.log(page.url());
+    console.log(`Waiting for ${rondomNumber} Seconds 🥱🥱🥱`);
     await delay(rondomNumber);
     await goToNewPage(page, page.url(), {});
     capthaElement = await page.$("#challenge-running");

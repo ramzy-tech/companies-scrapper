@@ -6,6 +6,8 @@ import checkAndHold from "../utils/common/checkAndHold.js";
 import getNextPageLink from "../utils/clutch/getNextPageLink.js";
 import scrapePage from "../utils/clutch/scrapePage.js";
 import checkForCaptcha from "../utils/clutch/checkForCaptcha.js";
+import getCompanyDetails from "../utils/clutch/getCompanyDetails.js";
+import { saveDataToFile } from "../utils/common/saveDataToFile.js";
 
 export default async function startClutchScraping(page: Page, url: string) {
   let errorsNumber = 0,
@@ -19,7 +21,10 @@ export default async function startClutchScraping(page: Page, url: string) {
       await checkAndHold(page, process.env.CLUTCH_URL!, checkForCaptcha);
 
       nextPage = await getNextPageLink(page);
-      await scrapePage(page);
+      const companies = await scrapePage(page);
+      await getCompanyDetails(companies, page);
+
+      await saveDataToFile(companies, "../../../clutch-data.json");
     } catch (error) {
       delay(2 * errorsNumber);
       console.log("StartClutchScraping: ", error);

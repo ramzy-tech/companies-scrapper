@@ -6,49 +6,37 @@ import puppeteer from "puppeteer";
 import fs from "fs/promises";
 import startClutchScraping from "./scrape/clutch-scrape.js";
 import startGoodFirmsScraping from "./scrape/goodfirms-scrape.js";
+import getStartingUrl from "./utils/common/root/getStartingUrl.js";
 
 (async function () {
-  const websiteName = process.argv[2] as "clutch" | "goodfirms";
-  if (!["clutch", "goodfirms"].includes(websiteName)) {
-    console.log("Please enter a valid website name!!!");
-    return;
-  }
-
-  const pageNumber = process.argv[3]?.match(/--page=(\d+)/)?.[1];
-  let url: string;
-  if (websiteName === "clutch") {
-    url = pageNumber
-      ? `https://clutch.co/us/web-developers?page=${pageNumber}&reviews=1`
-      : process.env.CLUTCH_URL!;
-  } else {
-    url = pageNumber
-      ? `https://www.goodfirms.co/directory/cms/top-website-development-companies?page=${pageNumber}`
-      : process.env.GOODFIRMS_URL!;
-  }
-
-  const browser = await puppeteer.launch({ headless: false });
-  const page = await browser.newPage();
-
-  const fileName =
-    websiteName === "clutch" ? "./clutch-data.json" : "./goodfirms-data.json";
-  await fs.writeFile(fileName, "[");
-
-  const startTime = performance.now();
-  let endTime: number;
   try {
+    const { url, websiteName, sholudRewrite } = getStartingUrl();
+    const browser = await puppeteer.launch({ headless: false, slowMo: 50 });
+    const page = await browser.newPage();
+
+    const fileName =
+      websiteName === "clutch" ? "./clutch-data.json" : "./goodfirms-data.json";
+
+    sholudRewrite && (await fs.writeFile(fileName, "["));
+
+    const startTime = performance.now();
+    let endTime: number;
+
     websiteName === "clutch"
       ? await startClutchScraping(page, url)
       : await startGoodFirmsScraping(page, url);
+
+    browser.close();
+
+    await fs.appendFile(fileName, "]");
+    endTime = performance.now();
+    console.log(
+      `web scraping took ${Math.round(
+        (endTime - startTime) / 1000 / 60
+      )} Minutes to complete.`
+    );
   } catch (error) {
     console.error("Error Index:", error);
+    process.exit(1);
   }
-  browser.close();
-
-  await fs.appendFile(fileName, "]");
-  endTime = performance.now();
-  console.log(
-    `web scraping took ${Math.round(
-      (endTime - startTime) / 1000 / 60
-    )} Minutes to complete.`
-  );
 })();

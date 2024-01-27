@@ -18,11 +18,6 @@ export default async function getNewCookeis(page: Page, sourceUrl: string) {
   await goToNewPage(newPage, sourceUrl, {
     waitUntil: "networkidle2",
   });
-  // // Wait until all the cookies are added to the page
-  // await page.waitForFunction(() => {
-  //   // Check the condition to determine if all cookies are added
-  //   return document.cookie.split(";").length >= 25;
-  // });
 
   const newCookies = await newPage.cookies();
   await browser.close();
