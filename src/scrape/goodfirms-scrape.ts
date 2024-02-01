@@ -20,10 +20,8 @@ export default async function startGoodFirmsScraping(page: Page, url: string) {
       await scrapeCompanyPage(companies, page); // To get the social media links
 
       await saveDataToFile(companies, "../../../goodfirms-data.json");
-
-      console.log(companies);
     } catch (error) {
-      console.log(error);
+      console.log("StartGoodFirmsScraping: ", error);
     }
   } while (nextPageUrl);
 }
