@@ -5,12 +5,11 @@ import { fileURLToPath } from "url";
 import getLastPageNumber from "./getLastPageNumber.js";
 
 function adjustURL(url: string, pageNumber: string) {
-  if (url.endsWith('?')) {
-    return `${url}page=${pageNumber}`
-  } else if (url.includes('?')) {
+  console.log(url, pageNumber)
+  if (url.includes('?')) {
     return `${url}&page=${pageNumber}`
   }
-  return url
+  return `${url}?page=${pageNumber}`
 }
 export default function getStartingUrl() {
   const websiteName = process.argv[2] as "clutch" | "goodfirms";
@@ -41,6 +40,7 @@ export default function getStartingUrl() {
       const lastPageNumber = getLastPageNumber(fileAbsolutePath);
       if (lastPageNumber) {
         url = adjustURL(process.env.CLUTCH_URL as string, lastPageNumber);
+        console.log(url)
         sholudRewrite = false;
       } else {
         url = process.env.CLUTCH_URL!;
