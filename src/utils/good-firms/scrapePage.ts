@@ -2,7 +2,7 @@ import { Page } from "puppeteer";
 import ClutchCompanyType from "../../../types/ClutchCompany.js";
 
 export default async function scrapePage(page: Page) {
-  return await page.evaluate(() => {
+  const companiesData = await page.evaluate(() => {
     const results: Partial<ClutchCompanyType>[] = [];
 
     const companyElements =
@@ -72,4 +72,9 @@ export default async function scrapePage(page: Page) {
 
     return results;
   });
+
+  const pageNumber = page.url().match(/(?:\?|&)page=(\d+)/)?.[1] ?? "0";
+  companiesData.forEach((company) => (company.page = pageNumber));
+
+  return companiesData;
 }
