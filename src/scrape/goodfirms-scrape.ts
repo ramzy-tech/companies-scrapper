@@ -5,13 +5,17 @@ import scrapeCompanyPage from "../utils/good-firms/scrapeCompanyPage.js";
 import checkForCaptcha from "../utils/good-firms/checkForCaptcha.js";
 import getNextPageLink from "../utils/good-firms/getNextPageLink.js";
 import { saveDataToFile } from "../utils/common/saveDataToFile.js";
+import delay from "../utils/common/delay.js";
 
 export default async function startGoodFirmsScraping(page: Page, url: string) {
-  let nextPageUrl = url;
+  let nextPageUrl = url,
+    errorsNumber = 0;
   do {
     try {
       console.log(`Working on page ${nextPageUrl}`);
-      await goToNewPage(page, url, { waitUntil: "networkidle2" });
+      if (errorsNumber > 6) break;
+
+      await goToNewPage(page, nextPageUrl, { waitUntil: "networkidle2" });
       await checkForCaptcha(page);
 
       nextPageUrl = await getNextPageLink(page);
@@ -21,7 +25,9 @@ export default async function startGoodFirmsScraping(page: Page, url: string) {
 
       await saveDataToFile(companies, "../../../goodfirms-data.json");
     } catch (error) {
+      delay(2 * errorsNumber);
       console.log("StartGoodFirmsScraping: ", error);
+      errorsNumber++;
     }
   } while (nextPageUrl);
 }
